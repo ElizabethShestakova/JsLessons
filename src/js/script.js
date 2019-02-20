@@ -1,44 +1,125 @@
-const cartWrapper = document.querySelector('.cart__wrapper'),
-      cart = document.querySelector('.cart'),
-      close = document.querySelector('.cart__close'),
-      open = document.querySelector('#cart'),
-      goodsBtn = document.querySelectorAll('.goods__btn'),
-      products = document.querySelectorAll('.goods__item'),
-      confirm = document.querySelector('.confirm'),
-      badge = document.querySelector('.nav__badge'),
-      totalCost = document.querySelector('.cart__total > span'),//только первый span
-      titles = document.querySelectorAll('.goods__title');
 
-function openCart() {
-    cart.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-}
+window.addEventListener('DOMContentLoaded', () => {
 
-function closeCart() {
-    cart.style.display = 'none';
-    document.body.style.overflow = '';
-}
+    const
+        cartWrapper = document.querySelector('.cart__wrapper'),
+        cart = document.querySelector('.cart'),
+        close = document.querySelector('.cart__close'),
+        open = document.querySelector('#cart'),
+        goodsBtn = document.querySelectorAll('.goods__btn'),
+        products = document.querySelectorAll('.goods__item'),
+        confirm = document.querySelector('.confirm'),
+        badge = document.querySelector('.nav__badge'),
+        totalCost = document.querySelector('.cart__total > span'),
+        titles = document.querySelectorAll('.goods__title');
 
-open.addEventListener('click', openCart);
-close.addEventListener('click', closeCart);
+    function openCart() {
+        cart.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
 
-goodsBtn.forEach(function(btn, i) {
-    btn.addEventListener('click', () => {
-        let item = products[i].cloneNode(true),//клонировали узел, true - клонировать ли потомков или только сам узел
-            trigger = item.querySelector('button'),//кнопка "Добавить в коризну"
-            removeBtn = document.createElement('div'),//будет добавлять удаление из корзины
-            empty = cartWrapper.querySelector('.empty');//надпись "корзина пуста"
-        
-        trigger.remove();
+    function closeCart() {
+        cart.style.display = 'none';
+        document.body.style.overflow = '';
+    }
 
-        removeBtn.classList.add('goods__item-remove');
-        removeBtn.innerHTML = '&times';//крестик
-        item.appendChild(removeBtn);
+    open.addEventListener('click', openCart);
+    close.addEventListener('click', closeCart);
 
-        cartWrapper.appendChild(item);
+    goodsBtn.forEach( (e, i) => {
+        e.addEventListener('click', () => {
+            let 
+                item = products[i].cloneNode(true),
+                trigger = item.querySelector('button'),
+                removeBtn = document.createElement('div'),
+                empty = cartWrapper.querySelector('.empty');
 
-        if (empty) {
-            empty.remove();
-        }
+            trigger.remove();
+
+            showConfirm();
+            calcGoods(1);
+
+            removeBtn.classList.add('goods__item-remove');
+            removeBtn.innerHTML = '&times';
+            item.appendChild(removeBtn);
+
+            cartWrapper.appendChild(item);
+
+            if (empty) empty.remove();
+
+            calcTotal();
+            removeFromCart();
+        });
     });
+
+    function sliceTitle() {
+        titles.forEach((e) => {
+            if ( e.textContent.length < 70 ) {
+                return;
+            } else {
+                const 
+                    str = e.textContent.slice(0, 71) + '...';
+                e.textContent = str;
+            }
+        });
+    }
+    
+    sliceTitle();
+
+    function showConfirm() {
+        confirm.style.display = 'block';
+        let 
+            counter = 100;
+
+        const 
+            id = setInterval(frame, 10);
+
+        function frame() {
+            if (counter === 10) {
+                clearInterval(id);
+                confirm.style.display = 'none';
+            } else {
+                counter--;
+                confirm.style.transform = `translateY(-${counter}px)`;
+                confirm.style.opacity = '.' + counter;
+            }
+        }
+    }
+
+    function calcGoods(i) {
+        const
+            items = cartWrapper.querySelectorAll('.goods__item');
+
+        badge.textContent = i + items.length;
+
+        if ( !(i + items.length) )
+            cartWrapper.innerHTML = '<div class="empty">Ваша корзина пока пуста</div>';
+    }
+
+    function calcTotal() {
+        const
+            prices = document.querySelectorAll('.cart__wrapper > .goods__item > .goods__price > span');
+
+        let
+            total = 0;
+
+        prices.forEach( (e) => {
+            total += +e.textContent;
+        });
+
+        totalCost.textContent = total;
+    }
+
+    function removeFromCart() {
+        const
+            removeBtn = cartWrapper.querySelectorAll('.goods__item-remove');
+        
+        removeBtn.forEach( (e) => {
+            e.addEventListener('click', () => {
+                e.parentElement.remove();
+                calcGoods(0);
+                calcTotal();
+            });
+        });
+    }
 });
