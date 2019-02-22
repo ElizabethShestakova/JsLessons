@@ -31,14 +31,85 @@ goodsBtn.forEach(function(btn, i) {
         
         trigger.remove();
 
+        showConfirm();
+        
+
         removeBtn.classList.add('goods__item-remove');
         removeBtn.innerHTML = '&times';//крестик
         item.appendChild(removeBtn);
 
         cartWrapper.appendChild(item);
-
-        if (empty) {
-            empty.remove();
+        caclGoods(); 
+        calcTotal();       
+        if (empty.style.display == 'block' || empty.style.display == '' ) {            
+            empty.style.display = 'none';
+            console.log(empty.style.display);
+            // empty.remove();
         }
+        removeFromCart();
     });
+
+    //обрежем названия товаров
+    function sliceTitles() {
+        titles.forEach(function(item) {
+            //trim() - убрат пробелмы в начале и в конце строки
+            if (item.textContent.trim().length > 40) {
+               let str = `${item.textContent.trim().slice(0, 40)}...`;
+               item.textContent = str; 
+            }            
+        })
+    }
+
+    sliceTitles();
+
+    function showConfirm() {
+        confirm.style.display = 'block';
+        let counter = 100;
+        const id = setInterval(frame, 10);
+
+        function frame() {
+            if (counter == 10) {
+                clearInterval(id);
+                confirm.style.display = 'none';
+            } else {
+                counter--;
+                confirm.style.transform = `translateY(-${counter}px)`;
+                confirm.style.opacity = '.' + counter;
+            }
+
+        }
+    }
+
+    function caclGoods() {
+        const items = cartWrapper.querySelectorAll('.goods__item');
+        // console.log(items);
+        badge.textContent = items.length;
+        let empty = cartWrapper.querySelector('.empty');
+        if (items.length == 0 && empty.style.display == 'none') {            
+            empty.style.display = 'block';
+        }
+    }
+
+    function calcTotal() {
+        const prices = document.querySelectorAll('.cart__wrapper > .goods__item > .goods__price > span');
+        let total = 0;
+        prices.forEach(function(item) {
+            total += +item.textContent;
+        })
+        totalCost.textContent = total;
+    }
+
+    function removeFromCart() {
+       const removeBtn = cartWrapper.querySelectorAll('.goods__item-remove');//кнопки крестики
+       removeBtn.forEach(function(btn) {
+           btn.addEventListener('click', () => {
+            btn.parentElement.remove();
+
+            caclGoods(); 
+            calcTotal();
+
+           })
+       });
+    }
+
 });
