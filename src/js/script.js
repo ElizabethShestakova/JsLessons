@@ -43,7 +43,7 @@ goodsBtn.forEach(function(btn, i) {
         calcTotal();       
         if (empty.style.display == 'block' || empty.style.display == '' ) {            
             empty.style.display = 'none';
-            console.log(empty.style.display);
+            // console.log(empty.style.display);
             // empty.remove();
         }
         removeFromCart();
